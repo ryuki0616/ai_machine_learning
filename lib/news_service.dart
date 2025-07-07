@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'encryption_service.dart';
 
 /// ニュースサービスクラス
 /// Gemini AIを使用してニュースの取得・要約を行う
 class NewsService {
-  /// Google Gemini APIのAPIキー（Google AI Studioで取得したものをここに記載）
+  /// Google Gemini APIのAPIキー（暗号化済み）
   /// 注意: 本番環境では環境変数や安全な設定管理を使用すること
-  static const String _apiKey = 'AIzaSyBZ5NTtc141JB2fIRdzGYlvK1HCIoMsESA';
+  /// 暗号化キー: 'your-secret-key-123'
+  static const String _encryptedApiKey = 'OCYPE34KJxs3LEJ6GyMIRX8LUh0/AScaOSYCCA1ZXyxWLRt+dHw8';
   
   /// Geminiモデルのインスタンス（初期化時に作成）
   /// late修飾子により、initialize()が呼ばれるまで使用不可
@@ -16,9 +18,15 @@ class NewsService {
   /// アプリ起動時などに一度だけ呼び出す必要がある
   /// このメソッドを呼ばずにgetNews()やgetDetailedSummary()を使用するとエラーになる
   static void initialize() {
+    // 暗号化されたAPIキーを復号化
+    final apiKey = EncryptionService.decrypt(_encryptedApiKey);
+    if (apiKey.isEmpty) {
+      throw Exception('APIキーの復号化に失敗しました');
+    }
+    
     _model = GenerativeModel(
       model: 'gemini-2.5-pro', // 使用するGeminiモデル名（最新推奨モデル）
-      apiKey: _apiKey,           // 上記で設定したAPIキー
+      apiKey: apiKey,          // 復号化されたAPIキー
     );
   }
 

@@ -13,6 +13,7 @@ class _NewsWidgetState extends State<NewsWidget> {
   List<NewsItem> _news = [];
   bool _loading = false;
   String _error = '';
+  bool _isExpanded = false; // 折りたたみ状態を管理（デフォルトは折りたたみ）
 
   @override
   void initState() {
@@ -73,54 +74,68 @@ class _NewsWidgetState extends State<NewsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.article, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                widget.category,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const Spacer(),
-              if (_loading)
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Row(
+              children: [
+                Icon(Icons.article, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  widget.category,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    strokeWidth: 2,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_loading)
-            const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            )
-          else if (_error.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                _error,
-                style: const TextStyle(color: Colors.white),
-              ),
-            )
-          else if (_news.isNotEmpty)
-            ..._news.map((item) => _buildNewsItem(item)).toList()
-          else
-            const Text(
-              'ニュースが見つかりませんでした',
-              style: TextStyle(color: Colors.white70),
+                const Spacer(),
+                Icon(
+                  _isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                if (_loading)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  ),
+              ],
             ),
+          ),
+          if (_isExpanded) ...[
+            const SizedBox(height: 12),
+            if (_loading)
+              const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            else if (_error.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _error,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              )
+            else if (_news.isNotEmpty)
+              ..._news.map((item) => _buildNewsItem(item)).toList()
+            else
+              const Text(
+                'ニュースが見つかりませんでした',
+                style: TextStyle(color: Colors.white70),
+              ),
+          ],
         ],
       ),
     );
