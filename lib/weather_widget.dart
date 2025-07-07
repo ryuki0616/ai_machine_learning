@@ -10,8 +10,8 @@ class WeatherWidget extends StatefulWidget {
 }
 
 class _WeatherWidgetState extends State<WeatherWidget> {
-  Map<String, dynamic>? _weatherData;
-  bool _isLoading = false;
+  Map<String, dynamic>? _weather;
+  bool _loading = false;
   String _error = '';
 
   @override
@@ -24,26 +24,30 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   void didUpdateWidget(covariant WeatherWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.city != widget.city) {
+      print('WeatherWidget: 都市名変更検出 ${oldWidget.city} → ${widget.city}');
       _fetchWeather();
     }
   }
 
   Future<void> _fetchWeather() async {
     if (widget.city.isEmpty) return;
+    print('WeatherWidget: 天気データ取得開始 - ${widget.city}');
     setState(() {
-      _isLoading = true;
+      _loading = true;
       _error = '';
     });
     try {
-      final weatherData = await WeatherService.getWeatherData(widget.city);
+      final weather = await WeatherService.getWeather(widget.city);
+      print('WeatherWidget: 天気データ取得成功 - ${weather['city']}');
       setState(() {
-        _weatherData = weatherData;
-        _isLoading = false;
+        _weather = weather;
+        _loading = false;
       });
     } catch (e) {
+      print('WeatherWidget: 天気データ取得エラー - $e');
       setState(() {
         _error = e.toString();
-        _isLoading = false;
+        _loading = false;
       });
     }
   }
@@ -51,15 +55,12 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.black,
-            Colors.grey[900]!,
-          ],
+          colors: [Colors.black, Colors.grey[900]!],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -70,152 +71,93 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // 検索バー削除
-          const SizedBox(height: 20),
-          // ローディング表示
-          if (_isLoading)
-            const CircularProgressIndicator(color: Colors.white)
-          else if (_error.isNotEmpty)
-            // エラー表示
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withOpacity(0.5)),
-              ),
-              child: Text(
-                _error,
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            )
-          else if (_weatherData != null)
-            // 天気情報表示
+      child: _loading
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : _error.isNotEmpty
+              ? _buildError()
+              : _weather != null
+                  ? _buildWeather()
+                  : const SizedBox(),
+    );
+  }
+
+  Widget _buildError() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.red.withOpacity(0.5)),
+      ),
+      child: Text(
+        _error,
+        style: const TextStyle(color: Colors.red),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildWeather() {
+    return Column(
+      children: [
+        // 都市名
+        Text(
+          _weather!['city'],
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        // メイン情報
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _weather!['icon'],
+              style: const TextStyle(fontSize: 48),
+            ),
+            const SizedBox(width: 16),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 都市名
                 Text(
-                  _weatherData!['name'],
+                  '${_weather!['temp']}°C',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
                 Text(
-                  '${_weatherData!['sys']['country']}',
+                  _weather!['description'],
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.8),
                   ),
-                ),
-                const SizedBox(height: 16),
-                
-                // 天気アイコンと気温
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      WeatherService.getWeatherIcon(_weatherData!['weather'][0]['icon']),
-                      style: const TextStyle(fontSize: 48),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${_weatherData!['main']['temp'].round()}°C',
-                          style: const TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          _weatherData!['weather'][0]['description'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                
-                // 体感温度
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '体感温度: ${_weatherData!['main']['feels_like'].round()}°C',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                
-                // 詳細情報
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildDetailItem(
-                      '湿度',
-                      '${_weatherData!['main']['humidity']}%',
-                      Icons.water_drop,
-                    ),
-                    _buildDetailItem(
-                      '風速',
-                      '${(_weatherData!['wind']['speed'] * 3.6).round()} km/h',
-                      Icons.air,
-                    ),
-                    _buildDetailItem(
-                      '気圧',
-                      '${_weatherData!['main']['pressure']} hPa',
-                      Icons.compress,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                // 追加情報
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildDetailItem(
-                      '視界',
-                      '${(_weatherData!['visibility'] / 1000).round()} km',
-                      Icons.visibility,
-                    ),
-                    _buildDetailItem(
-                      '最高気温',
-                      '${_weatherData!['main']['temp_max'].round()}°C',
-                      Icons.thermostat,
-                    ),
-                    _buildDetailItem(
-                      '最低気温',
-                      '${_weatherData!['main']['temp_min'].round()}°C',
-                      Icons.thermostat_outlined,
-                    ),
-                  ],
                 ),
               ],
             ),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
+        // 詳細情報
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildDetail('体感', '${_weather!['feels']}°C', Icons.thermostat),
+            _buildDetail('湿度', '${_weather!['humidity']}%', Icons.water_drop),
+            _buildDetail('風速', '${_weather!['wind']} km/h', Icons.air),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildDetailItem(String label, String value, IconData icon) {
+  Widget _buildDetail(String label, String value, IconData icon) {
     return Column(
       children: [
         Icon(icon, color: Colors.white.withOpacity(0.8), size: 20),

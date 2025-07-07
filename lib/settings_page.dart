@@ -11,9 +11,8 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController _cityController;
-  String _temperatureUnit = 'celsius';
-  String _language = 'ja';
-  bool _isLoading = true;
+  bool _loading = true;
+  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -24,43 +23,55 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadSettings() async {
     try {
-      final settings = await ConfigManager.loadSettings();
+      final settings = await ConfigManager.load();
       setState(() {
-        _cityController.text = settings['city_name'] ?? 'Tokyo';
-        _temperatureUnit = settings['temperature_unit'] ?? 'celsius';
-        _language = settings['language'] ?? 'ja';
-        _isLoading = false;
+        _cityController.text = settings['city'] ?? 'Tokyo';
+        _loading = false;
+        _hasChanges = false;
       });
     } catch (e) {
-      print('設定読み込みエラー: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _loading = false);
+    }
+  }
+
+  void _onChanged() {
+    if (!_hasChanges) {
+      setState(() => _hasChanges = true);
     }
   }
 
   Future<void> _saveSettings() async {
     try {
       final settings = {
-        'city_name': _cityController.text,
-        'temperature_unit': _temperatureUnit,
-        'language': _language,
+        'city': _cityController.text,
       };
-      
-      await ConfigManager.saveSettings(settings);
-      
+      print('SettingsPage: 設定保存開始 - ${settings['city']}');
+      await ConfigManager.save(settings);
+      print('SettingsPage: 設定保存完了');
+      setState(() => _hasChanges = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('設定をJSONファイルに保存しました')),
+          const SnackBar(content: Text('設定を保存しました')),
         );
         Navigator.pop(context, _cityController.text);
       }
     } catch (e) {
+      print('SettingsPage: 設定保存エラー - $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('設定の保存に失敗しました: $e')),
+          SnackBar(content: Text('保存エラー: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _resetSettings() async {
+    await ConfigManager.reset();
+    await _loadSettings();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('リセットしました')),
+      );
     }
   }
 
@@ -72,103 +83,77 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('設定'),
+        title: const Text('都市設定'),
         actions: [
+          if (_hasChanges)
+            TextButton(
+              onPressed: _saveSettings,
+              child: const Text(
+                '保存',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           IconButton(
-            onPressed: () async {
-              await ConfigManager.resetSettings();
-              await _loadSettings();
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('設定をリセットしました')),
-                );
-              }
-            },
+            onPressed: _resetSettings,
             icon: const Icon(Icons.refresh),
-            tooltip: '設定をリセット',
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '基本設定',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            
             TextField(
               controller: _cityController,
               decoration: const InputDecoration(
                 labelText: '都市名',
                 border: OutlineInputBorder(),
+                hintText: '例: Tokyo, Osaka, Kyoto',
               ),
-            ),
-            const SizedBox(height: 16),
-            
-            const Text(
-              '表示設定',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            
-            DropdownButtonFormField<String>(
-              value: _temperatureUnit,
-              decoration: const InputDecoration(
-                labelText: '温度単位',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'celsius', child: Text('摂氏 (°C)')),
-                DropdownMenuItem(value: 'fahrenheit', child: Text('華氏 (°F)')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _temperatureUnit = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            
-            DropdownButtonFormField<String>(
-              value: _language,
-              decoration: const InputDecoration(
-                labelText: '言語',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'ja', child: Text('日本語')),
-                DropdownMenuItem(value: 'en', child: Text('English')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _language = value!;
-                });
-              },
+              onChanged: (_) => _onChanged(),
             ),
             const SizedBox(height: 32),
-            
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveSettings,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+            if (_hasChanges) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveSettings,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text(
+                    '変更を保存',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                child: const Text('JSONファイルに保存'),
               ),
-            ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() => _hasChanges = false);
+                    _loadSettings();
+                  },
+                  child: const Text('変更をキャンセル'),
+                ),
+              ),
+            ] else ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('閉じる'),
+                ),
+              ),
+            ],
           ],
         ),
       ),

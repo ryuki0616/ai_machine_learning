@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'config_manager.dart';
-import 'city_data_service.dart';
 
 class JsonViewerPage extends StatefulWidget {
   const JsonViewerPage({Key? key}) : super(key: key);
@@ -11,100 +10,47 @@ class JsonViewerPage extends StatefulWidget {
 
 class _JsonViewerPageState extends State<JsonViewerPage> {
   String _jsonContent = '';
-  bool _isLoading = true;
-  String _selectedFile = 'settings';
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadJsonContent();
+    _loadJson();
   }
 
-  Future<void> _loadJsonContent() async {
+  Future<void> _loadJson() async {
     try {
-      String content;
-      switch (_selectedFile) {
-        case 'settings':
-          content = await ConfigManager.getSettingsAsString();
-          break;
-        case 'cities':
-          content = await CityDataService.getCitiesAsJson();
-          break;
-        default:
-          content = await ConfigManager.getSettingsAsString();
-      }
-      
+      final content = await ConfigManager.asJson();
       setState(() {
         _jsonContent = content;
-        _isLoading = false;
+        _loading = false;
       });
     } catch (e) {
       setState(() {
         _jsonContent = 'エラー: $e';
-        _isLoading = false;
+        _loading = false;
       });
     }
-  }
-
-  void _changeFile(String fileType) {
-    setState(() {
-      _selectedFile = fileType;
-      _isLoading = true;
-    });
-    _loadJsonContent();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('JSON設定ファイル'),
+        title: const Text('設定JSON'),
         actions: [
           IconButton(
-            onPressed: _loadJsonContent,
+            onPressed: _loadJson,
             icon: const Icon(Icons.refresh),
-            tooltip: '再読み込み',
           ),
         ],
       ),
-      body: _isLoading
+      body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'JSONファイル: ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      DropdownButton<String>(
-                        value: _selectedFile,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'settings',
-                            child: Text('設定ファイル'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'cities',
-                            child: Text('都市データ'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            _changeFile(value);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
                   Expanded(
                     child: Container(
                       width: double.infinity,
@@ -131,23 +77,21 @@ class _JsonViewerPageState extends State<JsonViewerPage> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            await ConfigManager.resetSettings();
-                            await _loadJsonContent();
+                            await ConfigManager.reset();
+                            await _loadJson();
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('設定をリセットしました')),
+                                const SnackBar(content: Text('リセットしました')),
                               );
                             }
                           },
-                          child: const Text('設定をリセット'),
+                          child: const Text('リセット'),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop(context),
                           child: const Text('閉じる'),
                         ),
                       ),

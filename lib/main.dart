@@ -9,11 +9,11 @@ void main() {
 }
 
 Future<String> loadCityName() async {
-  return await ConfigManager.getCityName();
+  return await ConfigManager.getCity();
 }
 
 Future<void> saveCityName(String city) async {
-  await ConfigManager.setCityName(city);
+  await ConfigManager.setCity(city);
 }
 
 class MyApp extends StatelessWidget {
@@ -80,10 +80,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
     if (result != null && result is String && result.isNotEmpty) {
+      print('都市名を変更: $_city → $result');
       await saveCityName(result);
       setState(() {
         _city = result;
       });
+      print('都市名更新完了: $_city');
     }
   }
 
