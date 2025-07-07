@@ -1,0 +1,84 @@
+{
+  "cities": [
+    {
+      "name": "Tokyo",
+      "name_ja": "東京",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Osaka",
+      "name_ja": "大阪",
+      "latitude": 34.6937,
+      "longitude": 135.5023,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Kyoto",
+      "name_ja": "京都",
+      "latitude": 35.0116,
+      "longitude": 135.7681,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Yokohama",
+      "name_ja": "横浜",
+      "latitude": 35.4437,
+      "longitude": 139.6380,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Nagoya",
+      "name_ja": "名古屋",
+      "latitude": 35.1815,
+      "longitude": 136.9066,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Sapporo",
+      "name_ja": "札幌",
+      "latitude": 43.0618,
+      "longitude": 141.3545,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Kobe",
+      "name_ja": "神戸",
+      "latitude": 34.6901,
+      "longitude": 135.1955,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Fukuoka",
+      "name_ja": "福岡",
+      "latitude": 33.5902,
+      "longitude": 130.4017,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Kawasaki",
+      "name_ja": "川崎",
+      "latitude": 35.5206,
+      "longitude": 139.7172,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    },
+    {
+      "name": "Saitama",
+      "name_ja": "さいたま",
+      "latitude": 35.8616,
+      "longitude": 139.6455,
+      "country": "Japan",
+      "timezone": "Asia/Tokyo"
+    }
+  ]
+} 

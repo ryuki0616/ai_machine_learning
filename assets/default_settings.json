@@ -1,0 +1,25 @@
+{
+  "city_name": "Tokyo",
+  "temperature_unit": "celsius",
+  "language": "ja",
+  "theme": "dark",
+  "notifications_enabled": true,
+  "update_interval": 30,
+  "units": {
+    "temperature": "celsius",
+    "wind_speed": "m/s",
+    "pressure": "hPa"
+  },
+  "display_options": {
+    "show_humidity": true,
+    "show_wind": true,
+    "show_pressure": true,
+    "show_uv_index": false
+  },
+  "favorite_cities": [
+    "Tokyo",
+    "Osaka",
+    "Kyoto"
+  ],
+  "last_updated": "2024-01-01T00:00:00Z"
+} 
