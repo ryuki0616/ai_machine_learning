@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ConfigManager {
@@ -12,6 +11,9 @@ class ConfigManager {
     'unit': 'celsius',
     'lang': 'ja',
     'theme': 'dark',
+    'news_category1': 'テクノロジー',
+    'news_category2': 'ビジネス',
+    'news_category3': 'エンターテイメント',
   };
 
   // 設定を読み込む

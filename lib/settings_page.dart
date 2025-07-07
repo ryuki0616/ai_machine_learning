@@ -11,6 +11,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController _cityController;
+  late TextEditingController _newsCategory1Controller;
+  late TextEditingController _newsCategory2Controller;
+  late TextEditingController _newsCategory3Controller;
   bool _loading = true;
   bool _hasChanges = false;
 
@@ -18,6 +21,9 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _cityController = TextEditingController(text: widget.initialCity);
+    _newsCategory1Controller = TextEditingController();
+    _newsCategory2Controller = TextEditingController();
+    _newsCategory3Controller = TextEditingController();
     _loadSettings();
   }
 
@@ -26,6 +32,9 @@ class _SettingsPageState extends State<SettingsPage> {
       final settings = await ConfigManager.load();
       setState(() {
         _cityController.text = settings['city'] ?? 'Tokyo';
+        _newsCategory1Controller.text = settings['news_category1'] ?? 'テクノロジー';
+        _newsCategory2Controller.text = settings['news_category2'] ?? 'ビジネス';
+        _newsCategory3Controller.text = settings['news_category3'] ?? 'エンターテイメント';
         _loading = false;
         _hasChanges = false;
       });
@@ -44,6 +53,9 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       final settings = {
         'city': _cityController.text,
+        'news_category1': _newsCategory1Controller.text,
+        'news_category2': _newsCategory2Controller.text,
+        'news_category3': _newsCategory3Controller.text,
       };
       print('SettingsPage: 設定保存開始 - ${settings['city']}');
       await ConfigManager.save(settings);
@@ -78,6 +90,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _cityController.dispose();
+    _newsCategory1Controller.dispose();
+    _newsCategory2Controller.dispose();
+    _newsCategory3Controller.dispose();
     super.dispose();
   }
 
@@ -89,7 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('都市設定'),
+        title: const Text('設定'),
         actions: [
           if (_hasChanges)
             TextButton(
@@ -107,54 +122,97 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _cityController,
-              decoration: const InputDecoration(
-                labelText: '都市名',
-                border: OutlineInputBorder(),
-                hintText: '例: Tokyo, Osaka, Kyoto',
-              ),
-              onChanged: (_) => _onChanged(),
-            ),
-            const SizedBox(height: 32),
-            if (_hasChanges) ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveSettings,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text(
-                    '変更を保存',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '都市設定',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _hasChanges = false);
-                    _loadSettings();
-                  },
-                  child: const Text('変更をキャンセル'),
+              TextField(
+                controller: _cityController,
+                decoration: const InputDecoration(
+                  labelText: '都市名',
+                  border: OutlineInputBorder(),
+                  hintText: '例: Tokyo, Osaka, Kyoto',
                 ),
+                onChanged: (_) => _onChanged(),
               ),
-            ] else ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('閉じる'),
+              const SizedBox(height: 32),
+              const Text(
+                'ニュース設定',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newsCategory1Controller,
+                decoration: const InputDecoration(
+                  labelText: 'ニュースカテゴリ 1',
+                  border: OutlineInputBorder(),
+                  hintText: '例: テクノロジー, ビジネス, スポーツ',
                 ),
+                onChanged: (_) => _onChanged(),
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newsCategory2Controller,
+                decoration: const InputDecoration(
+                  labelText: 'ニュースカテゴリ 2',
+                  border: OutlineInputBorder(),
+                  hintText: '例: エンターテイメント, 政治, 科学',
+                ),
+                onChanged: (_) => _onChanged(),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newsCategory3Controller,
+                decoration: const InputDecoration(
+                  labelText: 'ニュースカテゴリ 3',
+                  border: OutlineInputBorder(),
+                  hintText: '例: 健康, 教育, 旅行',
+                ),
+                onChanged: (_) => _onChanged(),
+              ),
+              const SizedBox(height: 32),
+              if (_hasChanges) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _saveSettings,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text(
+                      '変更を保存',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      setState(() => _hasChanges = false);
+                      _loadSettings();
+                    },
+                    child: const Text('変更をキャンセル'),
+                  ),
+                ),
+              ] else ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('閉じる'),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

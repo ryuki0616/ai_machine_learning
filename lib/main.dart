@@ -3,8 +3,11 @@ import 'weather_widget.dart';
 import 'settings_page.dart';
 import 'config_manager.dart';
 import 'json_viewer_page.dart';
+import 'news_widget.dart';
+import 'news_service.dart';
 
 void main() {
+  NewsService.initialize();
   runApp(const MyApp());
 }
 
@@ -56,6 +59,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _city = 'Tokyo';
+  String _newsCategory1 = 'テクノロジー';
+  String _newsCategory2 = 'ビジネス';
+  String _newsCategory3 = 'エンターテイメント';
   bool _loading = true;
 
   @override
@@ -65,9 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadCity() async {
-    final city = await loadCityName();
+    final settings = await ConfigManager.load();
     setState(() {
-      _city = city;
+      _city = settings['city'] ?? 'Tokyo';
+      _newsCategory1 = settings['news_category1'] ?? 'テクノロジー';
+      _newsCategory2 = settings['news_category2'] ?? 'ビジネス';
+      _newsCategory3 = settings['news_category3'] ?? 'エンターテイメント';
       _loading = false;
     });
   }
@@ -80,12 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
     if (result != null && result is String && result.isNotEmpty) {
-      print('都市名を変更: $_city → $result');
-      await saveCityName(result);
-      setState(() {
-        _city = result;
-      });
-      print('都市名更新完了: $_city');
+      print('設定を更新');
+      await _loadCity(); // 設定を再読み込み
     }
   }
 
@@ -135,9 +140,17 @@ class _MyHomePageState extends State<MyHomePage> {
           const SizedBox(width: 8), // 右端の余白
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: WeatherWidget(city: _city),
+        child: Column(
+          children: [
+            WeatherWidget(city: _city),
+            const SizedBox(height: 20),
+            NewsWidget(category: _newsCategory1),
+            NewsWidget(category: _newsCategory2),
+            NewsWidget(category: _newsCategory3),
+          ],
+        ),
       ),
     );
   }
