@@ -5,6 +5,7 @@ import 'config_manager.dart';
 import 'json_viewer_page.dart';
 import 'news_widget.dart';
 import 'news_service.dart';
+import 'date_time_widget.dart';
 
 void main() {
   NewsService.initialize();
@@ -144,6 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            const DateTimeWidget(),
             WeatherWidget(city: _city),
             const SizedBox(height: 20),
             NewsWidget(category: _newsCategory1),

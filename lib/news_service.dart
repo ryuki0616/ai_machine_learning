@@ -49,7 +49,7 @@ class NewsService {
 [
   {
     "title": "ニュースのタイトル",
-    "summary": "150文字以内の要約",
+    "summary": "200文字程度の要約",
     "url": "ニュースのURL（もしあれば）"
   }
 ]

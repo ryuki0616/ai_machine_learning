@@ -63,6 +63,10 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           colors: [Colors.black, Colors.grey[900]!],
         ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white,
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.white.withOpacity(0.1),
@@ -115,9 +119,10 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              _weather!['icon'],
-              style: const TextStyle(fontSize: 48),
+            Icon(
+              _getWeatherIcon(_weather!['description']),
+              size: 48,
+              color: Colors.white,
             ),
             const SizedBox(width: 16),
             Column(
@@ -155,6 +160,28 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         ),
       ],
     );
+  }
+
+  /// 天気の説明に基づいてアイコンを取得
+  IconData _getWeatherIcon(String description) {
+    final desc = description.toLowerCase();
+    print('天気の説明: $desc'); // デバッグ用
+    
+    if (desc.contains('晴')) {
+      return Icons.wb_sunny;
+    } else if (desc.contains('曇') || desc.contains('雲') || desc.contains('厚い雲')) {
+      return Icons.cloud;
+    } else if (desc.contains('雨')) {
+      return Icons.umbrella;
+    } else if (desc.contains('雪')) {
+      return Icons.ac_unit;
+    } else if (desc.contains('霧') || desc.contains('もや')) {
+      return Icons.cloud;
+    } else if (desc.contains('雷')) {
+      return Icons.flash_on;
+    } else {
+      return Icons.wb_sunny; // デフォルト
+    }
   }
 
   Widget _buildDetail(String label, String value, IconData icon) {
