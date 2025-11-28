@@ -1,16 +1,59 @@
-# ai_machine_learning
+# AI & Machine Learning Demo App
 
-A new Flutter project.
+Gemini AI (Google Generative AI) を活用した、ニュース要約と天気予報を表示するFlutterアプリケーションです。
+最先端のAIモデル `gemini-2.5-pro` を使用して、興味のあるカテゴリのニュースを自動収集・要約します。
 
-## Getting Started
+## 🚀 主な機能
 
-This project is a starting point for a Flutter application.
+### 1. AIニュース要約 (Powered by Gemini)
+- **スマート収集**: 指定した3つのカテゴリ（例：テクノロジー、ビジネス、エンタメ）に基づいて、AIが関連ニュースを収集します。
+- **自動要約**: ニュース記事の概要を200文字程度で自動生成し、リスト表示します。
+- **詳細生成**: 気になるニュースをタップすると、さらに詳しい内容（約150文字）をAIが生成して表示します。
 
-A few resources to get you started if this is your first Flutter project:
+### 2. 天気予報 (OpenWeatherMap)
+- **リアルタイム天気**: 設定した都市の現在の天気、気温、体感温度、湿度、風速を表示します。
+- **直感的なアイコン**: 天気状況に合わせて分かりやすい絵文字アイコンを表示します。
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 3. カスタマイズ設定
+- **都市設定**: 天気予報を表示したい都市を自由に設定可能（デフォルト: Tokyo）。
+- **ニュースカテゴリ**: 関心のある3つのニュースジャンルを自由に設定できます。
+- **ダークモード**: 視認性の高いダークテーマを採用。
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠 技術スタック
+
+- **フレームワーク**: Flutter
+- **言語**: Dart
+- **AIモデル**: Google Gemini 2.5 Pro (`google_generative_ai`)
+- **天気データ**: OpenWeatherMap API
+- **その他**:
+  - `shared_preferences`: 設定の保存
+  - `http`: API通信
+  - `intl`: 日時フォーマット
+
+## 📦 インストールと実行
+
+1. リポジトリをクローンします
+   ```bash
+   git clone https://github.com/ryuki0616/ai_machine_learning.git
+   ```
+
+2. 依存関係をインストールします
+   ```bash
+   flutter pub get
+   ```
+
+3. アプリを実行します
+   ```bash
+   flutter run
+   ```
+
+## ⚠️ 注意事項
+
+- **APIキーについて**: 
+  - 本プロジェクトには学習・デモ用に暗号化されたAPIキーが含まれていますが、本番環境で使用する場合はご自身のAPIキーを取得し、環境変数等で安全に管理することを推奨します。
+  - `NewsService` クラス内で Gemini APIキーの復号化を行っています。
+  - `WeatherService` クラス内で OpenWeatherMap APIキーを使用しています。
+
+## 📝 ライセンス
+
+このプロジェクトは学習目的で作成されています。
